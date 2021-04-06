@@ -1072,7 +1072,11 @@ class Need2KnowCharacter(object):
         print("**Skills**")
         for k in skills:
             if k in self.d:
-                print(k," ",self.d[k])
+                if k in self.bonus_skills:
+                    mark = "*"
+                else:
+                    mark = ""
+                print(k," ",self.d[k],mark)
     
 class Need2KnowPDF(object):
 
