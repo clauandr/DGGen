@@ -7,6 +7,7 @@ from PyPDF2 import PdfFileReader, PdfFileWriter
 from reportlab.pdfgen import canvas
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+import argparse
 
 TEXT_COLOR = (0, .1, .5)
 DEFAULT_FONT = 'Special Elite'
@@ -69,11 +70,12 @@ class Need2KnowCharacter(object):
         [17, 14, 13, 10, 10, 8],
     )
 
-    def __init__(self, gender='male', profession=''):
+    def __init__(self, gender='male', profession='', bonus_package=''):
 
         # Hold all dictionary
         self.d = {}
-
+        self.bonus_skills = []
+        
         if gender == 'male':
             self.d['male'] = 'X'
             self.d['name'] = choice(SURNAMES).upper() + ', ' + choice(MALES)
@@ -224,7 +226,7 @@ class Need2KnowCharacter(object):
             self.d['bond2'] = self.d['charisma']
             self.d['bond3'] = self.d['charisma']
             self.d['bond4'] = self.d['charisma']
-            self.d['craft1label'] = 'locksmithing'
+            self.d['craft1label'] = 'Locksmithing'
             possible = set([
                 ('craft1value', 40),
                 ('demolitions', 40),
@@ -358,7 +360,7 @@ class Need2KnowCharacter(object):
 
         if profession == 'Media Specialist':
 
-            self.d['art1'] = 60
+            self.d['art1value'] = 60
             self.d['history'] = 40
             self.d['humint'] = 40
             self.d['persuade'] = 50
@@ -369,7 +371,7 @@ class Need2KnowCharacter(object):
             possible = set([
                 ('anthropology', 40),
                 ('archeology', 40),
-                ('art2', 40),
+                ('art2value', 40),
                 ('bureaucracy', 50),
                 ('computer science', 40),
                 ('criminology', 50),
@@ -504,7 +506,7 @@ class Need2KnowCharacter(object):
             self.d['bond4'] = self.d['charisma']
             possible = set([
                 ('anthropology', 30),
-                ('art1', 30),
+                ('art1value', 30),
                 ('craft1value', 30),
                 ('science1value', 30),
             ])
@@ -587,12 +589,12 @@ class Need2KnowCharacter(object):
 
         # bonus points
 
-        possible = set([
+        possible_bonus_skills = set([
             'accounting',
             'alertness',
             'anthropology',
             'archeology',
-            'art1',
+            'art1value',
             'artillery',
             'athletics',
             'bureaucracy',
@@ -631,14 +633,447 @@ class Need2KnowCharacter(object):
             'unarmed combat',
             'language1',
         ])
-        bonus_skills = sample(possible, 8)
-        for skill in bonus_skills:
+        
+       
+        if bonus_package == 'artist' or bonus_package == 'actor' or bonus_package == 'musician':
+            self.bonus_skills = set([
+                'alertness',
+                'craft1value',
+                'disguise',
+                'persuade',
+                'art1value',
+                'art2value',
+                'art3value',
+                'humint',
+            ])
+        
+        if bonus_package == 'athlete':
+            self.bonus_skills = set([
+                'alertness',
+                'athletics',
+                'dodge',
+                'first aide',
+                'humint',
+                'persuade',
+                'swim',
+                'unarmed combat',
+            ])
+        
+        if bonus_package == 'author' or bonus_package == 'editor' or bonus_package == 'journalist':
+            self.bonus_skills = set([
+                'anthropology',
+                'art1value',
+                'bureaucracy',
+                'history',
+                'law',
+                'occult',
+                'persuade',
+                'humint',
+            ])
+        
+        if bonus_package == 'black bag training' or bonus_package == 'blackbag':
+        
+            l1,v1 = self.setLabelSkill('craft','Electrician')
+            l2,v2 = self.setLabelSkill('craft','Locksmithing')
+            
+            self.bonus_skills = set([
+                'alertness',
+                'athletics',
+                v1,
+                v2,
+                'criminology',
+                'disguise',
+                'search',
+                'stealth',
+            ])
+            
+        if bonus_package == 'blue-collar worker' or bonus_package == 'bluecollar':
+            self.bonus_skills = set([
+                'alertness',
+                'craft1value',
+                'craft2value',
+                'drive',
+                'fisrt aide',
+                'heavy machinery',
+                'navigate',
+                'search',
+            ])
+            
+        if bonus_package == 'bureaucrat':
+            self.bonus_skills = set([
+                'accounting',
+                'bureaucracy',
+                'computer science',
+                'criminology',
+                'humint',
+                'law',
+                'persuade',
+            ])    
+            self.bonus_skills = self.bonus_skills.union(sample(possible_bonus_skills - self.bonus_skills,1))
+        
+        if bonus_package == 'clergy':
+            self.bonus_skills = set([
+                'language1',
+                'language2',
+                'language3',
+                'history',
+                'humint',
+                'occult',
+                'persuade',
+                'psychotherapy',
+            ])
+            
+        if bonus_package == 'combat veteran' or bonus_package == 'veteran':
+            self.bonus_skills = set([
+                'alertness',
+                'dodge',
+                'firearms',
+                'first aide',
+                'heavy weapons',
+                'melee weapons',
+                'stealth',
+                'unarmed combat',
+            ])
+                
+        if bonus_package == 'computer enthusiast' or bonus_package == 'hacker':
+            l1,v1 = self.setLabelSkill('craft','Microelectronics')
+            l2,v2 = self.setLabelSkill('science','Mathematics')
+            self.bonus_skills = set([
+                'computer science',
+                'sigint',
+                v1,
+                v2,
+            ])
+            self.bonus_skills = self.bonus_skills.union(sample(possible_bonus_skills - self.bonus_skills,4))
+        
+        
+        if bonus_package == 'counselor':
+            self.bonus_skills = set([
+                'bureaucracy',
+                'first aide',
+                'language1',
+                'humint',
+                'law',
+                'persuade',
+                'psychotherapy',
+                'search',
+            ])
+        
+        if bonus_package == 'criminalist':
+            self.bonus_skills = set([
+                'accounting',
+                'bureaucracy',
+                'computer science',
+                'criminology',
+                'forensics',
+                'law',
+                'pharmacy',
+                'search',
+            ])
+            
+        if bonus_package == 'firefighter':
+            self.bonus_skills = set([
+                'alertness',
+                'demolitions',
+                'drive',
+                'first aide',
+                'forensics',
+                'heavy machinery',
+                'navigate',
+                'search',
+            ])  
+            
+        if bonus_package == 'gangster' or bonus_package == 'deep cover':
+            self.bonus_skills = set([
+                'alertness',
+                'criminology',
+                'dodge',
+                'drive',
+                'persuade',
+                'stealth',
+            ])  
+            
+            possible = set([
+                'athletics',
+                'language1',
+                'firearms',
+                'humint',
+                'melee weapons',
+                'pharmacy',
+                'unarmed combat',
+            ])
+            self.bonus_skills = self.bonus_skills.union(sample(possible,2))
+        
+                
+        if bonus_package == 'interrogator':
+            self.bonus_skills = set([
+                'criminology',
+                'language1',
+                'language2',
+                'humint',
+                'law',
+                'persuade',
+                'pharmacy',
+                'search',
+            ])
+            
+        if bonus_package == 'liberal arts degree' or bonus_package == 'arts':
+            self.bonus_skills = set([
+                'art1value',
+                'language1',
+                'history',
+                'persuade',
+            ])
+            possible = set([
+                'anthropology',
+                'archeology',
+            ])
+            self.bonus_skills = self.bonus_skills.union(sample(possible,1))
+            self.bonus_skills = self.bonus_skills.union(sample(possible_bonus_skills - self.bonus_skills,3))
+            
+        if bonus_package == 'military officer' or bonus_package == 'military':
+            self.bonus_skills = set([
+                'bureaucracy',
+                'firearms',
+                'history',
+                'military science',
+                'navigate',
+                'persuade',
+                'unarmed combat',
+            ])
+            possible = set([
+                'artillery',
+                'heavy machinery',
+                'heavy weapons',
+                'humint',
+                'pilot1',
+                'sigint',
+            ])
+            self.bonus_skills = self.bonus_skills.union(sample(possible,1))
+            
+        if bonus_package == 'mba':
+            self.bonus_skills = set([
+                'accounting',
+                'bureaucracy',
+                'humint',
+                'law',
+                'persuade',
+            ])    
+            self.bonus_skills = self.bonus_skills.union(sample(possible_bonus_skills - self.bonus_skills,3))
+            
+        if bonus_package == 'nurse' or bonus_package == 'paramedic' or bonus_package == 'premed' or bonus_package == 'pre-med':
+            l,v = self.setLabelSkill('science','Biology')
+            self.bonus_skills = set([
+                'alertness',
+                'first aide',
+                'medicine',
+                'persuade',
+                'pharmacy',
+                'psychotherapy',
+                'search',
+                v,
+            ])    
+            
+        if bonus_package == 'occult investigator' or bonus_package == 'occult' or bonus_package == 'conspiracy theorist' or bonus_package == 'conspiracy':
+            self.bonus_skills = set([
+                'anthropology',
+                'archeology',
+                'computer science',
+                'criminology',
+                'history',
+                'occult',
+                'persuade',
+                'search',
+            ])    
+            
+        if bonus_package == 'outdoorsman':
+            self.bonus_skills = set([
+                'alertness',
+                'athletics',
+                'firearms',
+                'navigate',
+                'ride',
+                'search',
+                'stealth',
+                'survival',
+            ])    
+            
+        if bonus_package == 'photographer':
+            l,v = self.setLabelSkill('art','Photography')
+            self.bonus_skills = set([
+                'alertness',
+                'computer science',
+                'persuade',
+                'search',
+                'stealth',
+                v,
+            ])    
+            self.bonus_skills = self.bonus_skills.union(sample(possible_bonus_skills - self.bonus_skills,2))
+        
+        if bonus_package == 'pilot' or bonus_package == 'sailor':
+            l,v = self.setLabelSkill('craft','Mechanic')
+            self.bonus_skills = set([
+                'alertness',
+                'first aide',
+                'language1',
+                'navigate',
+                'pilot1',
+                'survival',
+                'swim',
+                v,
+            ])    
+            
+        if bonus_package == 'police officer' or bonus_package == 'police':
+            self.bonus_skills = set([
+                'alertness',
+                'criminology',
+                'drive',
+                'firearms',
+                'humint',
+                'law',
+                'melee weapons',
+                'unarmed combat',
+            ])     
+         
+        if bonus_package == 'science grad student' or bonus_package == 'science':
+            self.bonus_skills = set([
+                'bureaucracy',
+                'computer use',
+                'craft1value'
+                'language1',
+                'science1value',
+                'science2value',
+                'science3value',
+            ]) 
+            possible = set([
+                'accounting',
+                'forensics',
+                'law',
+                'pharmacy',
+            ])
+            self.bonus_skills = self.bonus_skills.union(sample(possible,1))
+            
+        if bonus_package == 'social worker' or bonus_package == 'social' or bonus_package == 'criminal justice degree':
+            self.bonus_skills = set([
+                'bureaucracy',
+                'criminology',
+                'forensics'
+                'language1',
+                'humint',
+                'law',
+                'persuade',
+                'search',
+            ]) 
+            
+        if bonus_package == 'soldier' or bonus_package == 'marine':
+            self.bonus_skills = set([
+                'alertness',
+                'artillery',
+                'athletics'
+                'drive',
+                'firearms',
+                'heavy weapons',
+                'military science',
+                'unarmed combat',
+            ]) 
+            
+        if bonus_package == 'translator':
+            self.bonus_skills = set([
+                'anthropology',
+                'language1',
+                'language2'
+                'language3',
+                'history',
+                'humint',
+                'persuade',
+            ]) 
+            self.bonus_skills = self.bonus_skills.union(sample(possible_bonus_skills - self.bonus_skills,1))
+         
+        if bonus_package == 'urban explorer':
+            self.bonus_skills = set([
+                'alertness',
+                'athletics',
+                'craft1value'
+                'law',
+                'navigate',
+                'persuade',
+                'search',
+                'stealth',
+            ]) 
+        
+         
+        if bonus_package == 'random':
+            self.bonus_skills = sample(possible_bonus_skills, 8)    
+        
+        # apply bonus skills
+        for skill in self.bonus_skills:
+            #print("BOOST ",skill)
             boost = self.d.get(skill, 0) + 20
             if boost > 80:
                 boost = 80
             self.d[skill] = boost
 
-
+    def setLabelSkill(self,prefix,label):
+        for n in range(1,4):
+            key = prefix + str(n) + 'label'
+            value = prefix + str(n) + 'value'
+            if key not in self.d:
+                self.d[key] = label
+                return key, value
+            elif self.d[key] == label:
+                return key, value
+                    
+        return None, None
+        
+        
+        
+    def dump(self):
+              
+        skills = sorted(self.d.keys())
+        
+        personal = [
+            'name',
+            'profession',
+            'nationality',
+            'age',
+            'birthday',
+            'male',
+            'female',
+        ]
+        
+        statistical = [
+            'strength',
+            'damage bonus',
+            'constitution',
+            'dexterity',
+            'intelligence',
+            'power',
+            'charisma',
+            'hitpoints',
+            'willpower',
+            'sanity',
+            'breaking point',
+            'bond1',
+            'bond2',
+            'bond3',
+            'bond4',
+        ]
+        print("*Character sheet*")
+        print("**Personal**")
+        for k in personal:
+            if k in self.d:
+                print(k," ",self.d[k])
+                skills.remove(k)
+        print("**Statistical**")    
+        for k in statistical:
+            if k in self.d:
+                print(k," ",self.d[k])
+                skills.remove(k)
+        print("**Skills**")
+        for k in skills:
+            if k in self.d:
+                print(k," ",self.d[k])
+    
 class Need2KnowPDF(object):
 
     # Location of form fields in Points (1/72 inch). 0,0 is bottom-left
@@ -674,8 +1109,12 @@ class Need2KnowPDF(object):
         'alertness': (200, 343),
         'anthropology': (200, 325),
         'archeology': (200, 307),
-        'art1': (200, 289),
-        'art2': (200, 281),
+        'art1value': (200, 289),
+        'art2value': (200, 281),
+        'art3value': (200, 274),
+        'art1label': (90, 289),
+        'art2label': (90, 281),
+        'art3label': (90, 274),
         'artillery': (200, 253),
         'athletics': (200, 235),
         'bureaucracy': (200, 217),
@@ -800,15 +1239,15 @@ class Need2KnowPDF(object):
     def distinguishing(self, field, value):
         return choice(DISTINGUISHING.get((field, value), [""]))
 
-    def add_page(self, d):
+    def add_page(self, character):
         # Add background.  ReportLab will cache it for repeat
         self.c.setFont(DEFAULT_FONT, 11)
         self.font_color(*TEXT_COLOR)
         self.c.drawImage(
             'data/Character Sheet NO BACKGROUND FRONT.jpg', 0, 0, 612, 792)
 
-        for key in d:
-            self.fill_field(key, d[key])
+        for key in character.d:
+            self.fill_field(key, character.d[key])
 
         # Tell ReportLab we're done with current page
         self.c.showPage()
@@ -822,13 +1261,64 @@ class Need2KnowPDF(object):
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("output", help="output file")
+    parser.add_argument("-p","--profession", help="profession")
+    parser.add_argument("-b","--bonus", help="bonus")
+    parser.add_argument("-n","--number", help="number of characters per profession")
+    parser.add_argument("-s","--sex", help="sex (m,f,b)")
+    parser.add_argument("-i","--index", help="index with bookmarks",action="store_true")
+    parser.add_argument("-t","--text", help="text output",action="store_true")
+    args = parser.parse_args()
+    
+    filename = 'DeltaGreenPregen.pdf'
+    if(args.output):
+        filename = args.output
+    
+    number = 1    
+    if(args.number):
+        number = args.number
+        
+    sex = choice(['m','f'])
+    if(args.sex):
+        sex = args.sex
+        
+    profession_list = PROFESSIONS
+    if(args.profession):
+        profession_list = []
+        for prof in PROFESSIONS:
+            if args.profession.upper() in prof.upper():
+                profession_list.append(prof)
+                break
 
-    p = Need2KnowPDF('DeltaGreenPregen.pdf', PROFESSIONS, 40)
-    for profession in PROFESSIONS:
+    bonus_package = 'random'
+    if(args.bonus):
+        bonus_package = args.bonus
+    
+    
+    total = None
+    if(args.index):
+        total = number
+        if(sex == 'b'):
+            total = 2*number
+        
+    print('professions: ',profession_list)
+    print('bonus_package: ',bonus_package)
+    print('sex: ',sex)
+    
+    
+    p = Need2KnowPDF(filename, profession_list, total)
+    for profession in profession_list:
         p.bookmark(profession)
-        for x in range(20):
-            c = Need2KnowCharacter(gender='female', profession=profession)
-            p.add_page(c.d)
-            c = Need2KnowCharacter(gender='male', profession=profession)
-            p.add_page(c.d)
+        for x in range(number):
+            if(sex == 'f' or sex == 'b'):
+                c = Need2KnowCharacter(gender='female', profession=profession, bonus_package = bonus_package)
+                p.add_page(c)
+                if(args.text):
+                    c.dump()
+            if(sex == 'm' or sex == 'b'):
+                c = Need2KnowCharacter(gender='male', profession=profession, bonus_package = bonus_package)
+                p.add_page(c)
+                if(args.text):
+                    c.dump()
     p.save_pdf()
